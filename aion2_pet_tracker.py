@@ -653,6 +653,7 @@ TEXT = {
         "online": "в игре", "offline": "игра не найдена", "synced": "данные {t}", "unsynced": "без данных",
         "rename": "Переименовать…", "rename_title": "Имя монстра", "hide": "Убрать из списка",
         "clear": "Очистить список", "opacity": "Прозрачность", "quit": "Закрыть",
+        "to_tray": "Свернуть в трей", "show_overlay": "Показать оверлей", "hide_overlay": "Скрыть оверлей",
         "auto": "Как в системе", "detect": "Определить по чату",
         "npcap_title": "Нужен Npcap",
         "npcap_hint": "Оверлей читает трафик игры через бесплатный драйвер Npcap. Установите его с официального сайта и перезапустите оверлей.",
@@ -670,6 +671,7 @@ TEXT = {
         "online": "in game", "offline": "game not found", "synced": "data {t}", "unsynced": "no data",
         "rename": "Rename…", "rename_title": "Monster name", "hide": "Remove from list",
         "clear": "Clear list", "opacity": "Opacity", "quit": "Close",
+        "to_tray": "Hide to tray", "show_overlay": "Show overlay", "hide_overlay": "Hide overlay",
         "auto": "Match system", "detect": "Detect from chat",
         "npcap_title": "Npcap is required",
         "npcap_hint": "The overlay reads game traffic through the free Npcap driver. Install it from the official site, then restart the overlay.",
@@ -889,6 +891,9 @@ def run_overlay():
             if ev[0] == "problem":
                 problem["v"] = ev[1]; changed = True
                 continue
+            if ev[0] == "tray":  # команды из значка в трее (приходят из его потока)
+                toggle_visible() if ev[1] == "toggle" else quit_()
+                continue
             if ev[0] == "gain":
                 mid = ev[1]
                 start = anim["p"] if anim["mid"] == mid and anim["p"] is not None else progress(mid)
@@ -907,8 +912,9 @@ def run_overlay():
         if dirty["v"]:
             dirty["v"] = False
             tr.save()
-        root.lift()
-        root.attributes("-topmost", True)
+        if visible["v"]:
+            root.lift()
+            root.attributes("-topmost", True)
         root.after(3000, autosave)
 
     # перетаскивание за любое место
@@ -940,9 +946,42 @@ def run_overlay():
     cv.bind("<ButtonRelease-1>", release)
 
     def quit_():
-        tr.pos = [root.winfo_x(), root.winfo_y()]
+        if visible["v"]:
+            tr.pos = [root.winfo_x(), root.winfo_y()]
         tr.save()
+        if tray["icon"]:
+            tray["icon"].stop()
         root.destroy()
+
+    visible = {"v": True}
+    tray = {"icon": None}
+
+    def toggle_visible():
+        if visible["v"]:
+            tr.pos = [root.winfo_x(), root.winfo_y()]
+            root.withdraw()
+        else:
+            root.deiconify()
+            root.geometry(f"+{tr.pos[0]}+{tr.pos[1]}" if tr.pos else "")
+            root.attributes("-topmost", True)
+        visible["v"] = not visible["v"]
+        if tray["icon"]:
+            tray["icon"].update_menu()
+
+    def start_tray():
+        """Значок в трее: окно без рамки не видно ни в панели задач, ни в Alt+Tab."""
+        try:
+            import pystray
+            from PIL import Image
+            img = Image.open(os.path.join(RES_DIR, "assets", "icon.ico"))
+            menu = pystray.Menu(
+                pystray.MenuItem(lambda item: L["hide_overlay"] if visible["v"] else L["show_overlay"],
+                                 lambda: events.put(("tray", "toggle")), default=True),
+                pystray.MenuItem(lambda item: L["quit"], lambda: events.put(("tray", "quit"))))
+            tray["icon"] = pystray.Icon("AION2-pet-tracker", img, "AION2 pet tracker", menu)
+            tray["icon"].run_detached()
+        except Exception as e:
+            log("tray:", repr(e))
 
     def menu_at(e, items):
         m = tk.Menu(root, tearoff=0, bg=ABYSS, fg=PEARL, activebackground=RIM,
@@ -967,7 +1006,8 @@ def run_overlay():
             tr.recent.clear(); dirty["v"] = True; draw()
         alpha = [(f"{int(a * 100)}%", lambda a=a: root.attributes("-alpha", a)) for a in (1.0, 0.94, 0.8, 0.6)]
         menu_at(e, [(L["clear"], clear), (L["opacity"], alpha), ("Язык / Language", lang_items()),
-                    ("Язык игры / Game language", game_lang_items()), None, (L["quit"], quit_)])
+                    ("Язык игры / Game language", game_lang_items()), None,
+                    *([(L["to_tray"], toggle_visible)] if tray["icon"] else []), (L["quit"], quit_)])
 
     def game_lang_items():
         # от языка клиента зависят имена монстров; обычно он определяется по чату сам
@@ -1039,6 +1079,7 @@ def run_overlay():
             events.put(("problem", ("sniff_title", "sniff_hint", None)))
 
     threading.Thread(target=sniffer, daemon=True).start()
+    start_tray()
     draw()
     root.after(100, pump)
     root.after(3000, autosave)

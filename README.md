@@ -38,6 +38,7 @@ Requirements:
 ## Usage
 
 - **Move:** drag the overlay anywhere.
+- **Tray icon:** click it to hide or show the overlay; its menu also closes the app.
 - **Menu:** use **⋯** or right-click. It has opacity, interface language (EN/RU, follows the system by default), game language (detected from chat by default) and clear list.
 - **Rename a monster:** right-click its row.
 - **Troubleshooting:** run `AION2-pet-tracker.exe --selftest` and check `aion2_pet_tracker.log` next to the exe.
@@ -99,6 +100,8 @@ This is an unofficial fan project, not affiliated with NCSOFT. The overlay only 
 Игра должна быть в оконном режиме или «окне без рамки», чат должен быть открыт.
 
 **Меню.** «⋯» или правая кнопка мыши: прозрачность, язык интерфейса, язык игры, переименование.
+
+**Трей.** Клик по значку скрывает или показывает оверлей, в меню значка есть «Закрыть».
 
 **Если что-то не работает:** `AION2-pet-tracker.exe --selftest`, затем смотрите `aion2_pet_tracker.log`.
 

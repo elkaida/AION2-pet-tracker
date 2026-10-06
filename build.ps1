@@ -7,6 +7,7 @@ python -m PyInstaller --noconfirm --onefile --windowed `
     --name AION2-pet-tracker `
     --icon "$root\assets\icon.ico" `
     --add-data "$root\data\names.json;data" `
+    --add-data "$root\assets\icon.ico;assets" `
     --collect-submodules scapy `
     --collect-all winocr `
     --collect-all winrt `
