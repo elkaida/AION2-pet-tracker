@@ -20,8 +20,9 @@ The overlay shows, for the monster you just killed:
 ## How it works
 
 - **Progress comes from the game's own network traffic.** The overlay reads (never modifies or sends) the packets the server sends to your game client, using [Npcap](https://npcap.com/) — the same approach as DPS meters. When your character enters the world, the server sends the level and points for every monster; each kill then sends the monster ID and the points gained. See [docs/PROTOCOL.md](docs/PROTOCOL.md).
-- **Pet names come from the chat.** Packets only carry numeric pet IDs (one per pet — the same pets you can ride once unlocked). When you kill a monster whose pet the overlay hasn't named yet, it reads the system chat line `<Pet>: <message> xN` with Windows' built-in text recognition. A name counts once it has been read twice. The chat tab with system messages has to be visible at that moment. The Russian message text is built in; for other client languages the app learns it on its own after a few kills.
-- **Names depend on the game language.** They are stored per client language, and the language is detected from the chat. Players on another language see their own names, not yours. Names that ship with the app live in [data/names.json](data/names.json).
+- **Pet names come from the app's own database.** Packets only carry numeric pet IDs (one per pet — the same pets you can ride once unlocked). [data/names.json](data/names.json) maps all 207 IDs to names in English, German, Spanish, French, Korean and Portuguese. The overlay never goes online for names.
+- **Unknown IDs fall back to the chat.** If an ID isn't in the database for your client language (a new pet after a patch, or Russian, which has only a few names so far), the overlay reads the system chat line `<Pet>: <message> xN` with Windows' built-in text recognition when you kill that monster. A name counts once it has been read twice, and the chat tab with system messages has to be visible at that moment. Until then it shows the English name.
+- **Game language** is detected from the chat, or can be set in the menu.
 
 ## Install
 
@@ -60,11 +61,16 @@ python aion2_pet_tracker.py          # run from source
 | Path | What |
 |---|---|
 | `aion2_pet_tracker.py` | Overlay: capture, protocol decoding, progress, name reading, UI |
-| `data/names.json` | Pet names shipped with the app, per game language |
+| `data/names.json` | Pet ID → name database, per game language |
+| `tools/fetch_pet_names.py` | Refreshes the database (run by hand after game updates) |
 | `tools/aion2_capture.py` | Traffic recorder for protocol research |
 | `docs/PROTOCOL.md` | What is known about the packets |
 | `assets/icon.ico` | App icon |
 | `build.ps1` | PyInstaller build script |
+
+## Credits
+
+Pet names and IDs in `data/names.json` (except Russian) come from the [MetaBot.GG](https://metabot.gg/en/aion-2/mounts) AION 2 database. Pet and monster names belong to NCSOFT.
 
 ## Disclaimer
 
@@ -89,7 +95,8 @@ This is an unofficial fan project, not affiliated with NCSOFT. The overlay only 
 **Как работает.**
 
 - **Прогресс берётся из сетевого трафика игры.** Трафик только читается через [Npcap](https://npcap.com/), как в DPS-метрах, ничего не изменяется и не отправляется. При входе в мир сервер присылает уровни и очки всех питомцев, а при каждом убийстве — ID питомца и полученные очки.
-- **Имена читаются из системной строки чата** «Имя: получены очки духа x1» встроенным распознаванием текста Windows. Имена хранятся отдельно для каждого языка клиента: игрок на другом языке увидит свои имена, а не ваши.
+- **Имена питомцев берутся из нашей базы** [data/names.json](data/names.json): все 207 ID с именами на английском, немецком, испанском, французском, корейском и португальском. В интернет за именами оверлей не ходит.
+- **Если ID в базе нет** (новый питомец после обновления или русский клиент, для которого пока известны не все имена), имя читается из системной строки чата «Имя: получены очки духа x1» встроенным распознаванием текста Windows. До этого показывается английское имя. Вкладка чата с системными сообщениями должна быть видна в момент убийства.
 
 **Установка.**
 

@@ -70,7 +70,7 @@ This packet carries no total, so the client (and the overlay) adds `amount` to t
 
 ## Pet names
 
-Names aren't in the traffic. They live in the encrypted localization paks of the client. The overlay reads them from the chat line instead; see the README.
+Names aren't in the traffic. The overlay uses its own ID → name database, `data/names.json`, built with `tools/fetch_pet_names.py` from the MetaBot.GG database. For IDs missing there, it falls back to reading the chat. In the game client itself, names live in encrypted localization paks.
 
 ## Re-checking after a patch
 

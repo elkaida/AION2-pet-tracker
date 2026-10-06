@@ -294,8 +294,9 @@ class Tracker:
         self.recent, self.hidden = [], set()
         self.synced = None  # время последней синхронизации с сервером
         self.pos = None
+        self.shared = load_shared_names()  # наша база data/names.json
         self.load()
-        for lang, shared in load_shared_names().items():  # свои имена важнее общих
+        for lang, shared in self.shared.items():  # свои имена (переименованные, выученные) важнее базы
             self.names_by_lang[lang] = {**shared, **self.names_by_lang.get(lang, {})}
 
     @property
@@ -341,7 +342,7 @@ class Tracker:
 
     def save(self):
         d = {"levels": self.levels, "points": self.points, "extra": self.extra,
-             "names": self.names_by_lang, "votes": self.votes_by_lang,
+             "names": self.own_names(), "votes": self.votes_by_lang,
              "phrases": self.phrases, "ocr_lang": self.ocr_lang,
              "game_lang": self.game_lang, "ui_lang": self.ui_lang,
              "recent": self.recent, "hidden": sorted(self.hidden),
@@ -407,13 +408,20 @@ class Tracker:
             self.names.pop(mid, None)
         self.votes.pop(mid, None)
 
+    def own_names(self):
+        """Только имена, которых нет в базе: копию базы в прогресс не сохраняем,
+        иначе обновлённая база перекрывалась бы старыми значениями."""
+        return {lang: {mid: n for mid, n in names.items() if self.shared.get(lang, {}).get(mid) != n}
+                for lang, names in self.names_by_lang.items()}
+
     def name(self, mid):
+        """База (язык клиента) -> выученное из чата -> кандидат из чата "?" -> английское из базы -> ID."""
         if mid in self.names:
             return self.names[mid]
         v = self.votes.get(mid)
         if v:
             return max(v, key=v.get) + "?"
-        return f"ID {mid}"
+        return self.shared.get("en", {}).get(mid) or f"ID {mid}"
 
     def view(self, mid):
         """(уровень, очки, нужно или None если максимум, души сверх максимума)."""
@@ -619,7 +627,8 @@ def run_sniffer(on_event):
 def replay(path):
     t = Tracker.__new__(Tracker)
     t.levels, t.points, t.extra = {}, {}, {}
-    t.names_by_lang, t.votes_by_lang = load_shared_names(), {}
+    t.shared = load_shared_names()
+    t.names_by_lang, t.votes_by_lang = {l: dict(m) for l, m in t.shared.items()}, {}
     t.ocr_lang, t.game_lang = None, "ru"
     t.recent, t.hidden, t.synced = [], set(), None
 
