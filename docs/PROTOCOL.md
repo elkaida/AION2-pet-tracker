@@ -44,29 +44,31 @@ It sits inside an LZ4 bundle.
 ```
 u32le   unknown
 varint  n_levels
-n_levels × { u32le monster_id, u32le monster_id (same), u32le level }
+n_levels × { u32le pet_id, u32le pet_id (same), u32le level }
 varint  n_points
-n_points × { u32le monster_id, u32le points }
+n_points × { u32le pet_id, u32le points }
 ...     more data (not used)
 ```
 
 - `level` is 0–3. `points` is the progress inside the current level and resets on every level-up.
-- Monsters that aren't listed are at 0.
+- Pets that aren't listed are at 0.
 - At level 3 the server always reports 0 points: it stops counting.
 
 Example: `1097 → level 1, points 21` showed in game as 21/25 toward level 2.
+
+IDs run from about 1001 to 1220 — one per pet, the same pets that can be ridden once unlocked (about 206 of them).
 
 ### `0d 90` — spirit points gained (one per kill)
 
 ```
 u8      kind        # always 1 so far
-u32le   monster_id
+u32le   pet_id
 u32le   amount      # the "xN" in the chat line
 ```
 
 This packet carries no total, so the client (and the overlay) adds `amount` to the last known state. Level-ups happen locally with thresholds 5 / 25 / 75.
 
-## Monster names
+## Pet names
 
 Names aren't in the traffic. They live in the encrypted localization paks of the client. The overlay reads them from the chat line instead; see the README.
 
@@ -74,4 +76,4 @@ Names aren't in the traffic. They live in the encrypted localization paks of the
 
 1. Run `python tools/aion2_capture.py capture.jsonl` before entering the world.
 2. Re-enter the world, then kill a few monsters and press F9 after each kill.
-3. Look for frames that appear exactly once per F9 mark and for the state packet in the login burst. Search for a monster ID you know as `u32le`.
+3. Look for frames that appear exactly once per F9 mark and for the state packet in the login burst. Search for a pet ID you know as `u32le`.

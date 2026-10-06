@@ -20,7 +20,7 @@ The overlay shows, for the monster you just killed:
 ## How it works
 
 - **Progress comes from the game's own network traffic.** The overlay reads (never modifies or sends) the packets the server sends to your game client, using [Npcap](https://npcap.com/) — the same approach as DPS meters. When your character enters the world, the server sends the level and points for every monster; each kill then sends the monster ID and the points gained. See [docs/PROTOCOL.md](docs/PROTOCOL.md).
-- **Monster names come from the chat.** Packets only carry numeric IDs. When you kill a monster the overlay hasn't named yet, it reads the system chat line `<Monster>: <message> xN` with Windows' built-in text recognition. A name counts once it has been read twice. The Russian message text is built in; for other client languages the app learns it on its own after a few kills.
+- **Pet names come from the chat.** Packets only carry numeric pet IDs (one per pet — the same pets you can ride once unlocked). When you kill a monster whose pet the overlay hasn't named yet, it reads the system chat line `<Pet>: <message> xN` with Windows' built-in text recognition. A name counts once it has been read twice. The chat tab with system messages has to be visible at that moment. The Russian message text is built in; for other client languages the app learns it on its own after a few kills.
 - **Names depend on the game language.** They are stored per client language, and the language is detected from the chat. Players on another language see their own names, not yours. Names that ship with the app live in [data/names.json](data/names.json).
 
 ## Install
@@ -60,7 +60,7 @@ python aion2_pet_tracker.py          # run from source
 | Path | What |
 |---|---|
 | `aion2_pet_tracker.py` | Overlay: capture, protocol decoding, progress, name reading, UI |
-| `data/names.json` | Monster names shipped with the app, per game language |
+| `data/names.json` | Pet names shipped with the app, per game language |
 | `tools/aion2_capture.py` | Traffic recorder for protocol research |
 | `docs/PROTOCOL.md` | What is known about the packets |
 | `assets/icon.ico` | App icon |
@@ -88,7 +88,7 @@ This is an unofficial fan project, not affiliated with NCSOFT. The overlay only 
 
 **Как работает.**
 
-- **Прогресс берётся из сетевого трафика игры.** Трафик только читается через [Npcap](https://npcap.com/), как в DPS-метрах, ничего не изменяется и не отправляется. При входе в мир сервер присылает уровни и очки всех монстров, а при каждом убийстве — ID монстра и полученные очки.
+- **Прогресс берётся из сетевого трафика игры.** Трафик только читается через [Npcap](https://npcap.com/), как в DPS-метрах, ничего не изменяется и не отправляется. При входе в мир сервер присылает уровни и очки всех питомцев, а при каждом убийстве — ID питомца и полученные очки.
 - **Имена читаются из системной строки чата** «Имя: получены очки духа x1» встроенным распознаванием текста Windows. Имена хранятся отдельно для каждого языка клиента: игрок на другом языке увидит свои имена, а не ваши.
 
 **Установка.**

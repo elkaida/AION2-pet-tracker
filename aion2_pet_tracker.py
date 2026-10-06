@@ -40,7 +40,7 @@ def data_dir():
 DATA_DIR = data_dir()
 STATE_FILE = os.path.join(DATA_DIR, "aion2_pet_tracker_state.json")
 LOG_FILE = os.path.join(DATA_DIR, "aion2_pet_tracker.log")
-NAMES_FILE = os.path.join(RES_DIR, "data", "names.json")  # имена монстров, общие для всех игроков
+NAMES_FILE = os.path.join(RES_DIR, "data", "names.json")  # имена питомцев, общие для всех игроков
 _OLD_STATE = os.path.join(DATA_DIR, "aion2_spirits_state.json")  # файл первых версий
 if not os.path.exists(STATE_FILE) and os.path.exists(_OLD_STATE):
     os.replace(_OLD_STATE, STATE_FILE)
@@ -53,7 +53,7 @@ REQ = [5, 25, 75]  # очков для уровней 1, 2, 3
 MAX_LEVEL = len(REQ)
 
 OP_STATE = b"\x00\x90"  # при входе в мир: уровни и очки по всем монстрам
-OP_GAIN = b"\x0d\x90"   # убийство: id монстра + полученные очки
+OP_GAIN = b"\x0d\x90"   # убийство: id питомца (вида монстра) + полученные очки
 OP_LZ4 = b"\xff\xff"    # сжатая пачка пакетов
 
 
@@ -68,7 +68,7 @@ def npcap_installed():
     return os.path.isfile(os.path.join(sysdir, "wpcap.dll"))
 
 
-# Языки клиента Aion 2 (папки L10N\Text): имена монстров у каждого свои.
+# Языки клиента Aion 2 (папки L10N\Text): имена питомцев у каждого свои.
 GAME_LANGS = {"en": "English", "ru": "Русский", "de": "Deutsch", "fr": "Français",
               "es": "Español", "pt": "Português", "ko": "한국어", "ja": "日本語"}
 
@@ -651,7 +651,7 @@ TEXT = {
         "no_data": "Нет данных с сервера", "no_data_hint": "Перезайдите персонажем, чтобы загрузить прогресс",
         "empty": "Убейте монстра", "empty_hint": "Его прогресс появится здесь",
         "online": "в игре", "offline": "игра не найдена", "synced": "данные {t}", "unsynced": "без данных",
-        "rename": "Переименовать…", "rename_title": "Имя монстра", "hide": "Убрать из списка",
+        "rename": "Переименовать…", "rename_title": "Имя питомца", "hide": "Убрать из списка",
         "clear": "Очистить список", "opacity": "Прозрачность", "quit": "Закрыть",
         "to_tray": "Свернуть в трей", "show_overlay": "Показать оверлей", "hide_overlay": "Скрыть оверлей",
         "auto": "Как в системе", "detect": "Определить по чату",
@@ -669,7 +669,7 @@ TEXT = {
         "no_data": "No server data yet", "no_data_hint": "Re-enter the world with your character to load progress",
         "empty": "Kill a monster", "empty_hint": "Its progress will show up here",
         "online": "in game", "offline": "game not found", "synced": "data {t}", "unsynced": "no data",
-        "rename": "Rename…", "rename_title": "Monster name", "hide": "Remove from list",
+        "rename": "Rename…", "rename_title": "Pet name", "hide": "Remove from list",
         "clear": "Clear list", "opacity": "Opacity", "quit": "Close",
         "to_tray": "Hide to tray", "show_overlay": "Show overlay", "hide_overlay": "Hide overlay",
         "auto": "Match system", "detect": "Detect from chat",
@@ -1010,7 +1010,7 @@ def run_overlay():
                     *([(L["to_tray"], toggle_visible)] if tray["icon"] else []), (L["quit"], quit_)])
 
     def game_lang_items():
-        # от языка клиента зависят имена монстров; обычно он определяется по чату сам
+        # от языка клиента зависят имена питомцев; обычно он определяется по чату сам
         mark = lambda code: ("✓ " if tr.game_lang == code else "    ")
         detected = tr.ocr_lang.split("-")[0] if tr.ocr_lang else None
         auto = L["detect"] + (f" ({GAME_LANGS.get(detected, detected)})" if detected else "")
