@@ -1,0 +1,17 @@
+# build output
+build/
+_build/
+dist/
+__pycache__/
+*.pyc
+
+# personal data: progress, logs, debug screenshots
+aion2_pet_tracker_state.json*
+aion2_spirits_state.json*
+*.log
+*_ocr_miss.jpg
+stop.flag
+
+# raw game traffic recordings
+captures/
+*.jsonl
